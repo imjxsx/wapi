@@ -3,7 +3,7 @@ import { Context } from "../../context/index.js";
 import { isGroup, isLid, isPn, toError } from "../../utils/index.js";
 import type { Bot } from "../bot.js";
 
-export function message(bot: Bot): void {
+export function messagesUpsert(bot: Bot): void {
   try {
     bot.ws?.ev.on("messages.upsert", async (upsert) => {
       try {
@@ -21,9 +21,7 @@ export function message(bot: Bot): void {
             }
           }
           if (isLid(ctx.from.jid) && isPn(ctx.from.pn)) {
-            if (!contacts.some((v) => (ctx.from.jid === v.jid && ctx.from.pn === v.pn))) {
-              contacts.push(ctx.from);
-            }
+            contacts.set(ctx.from.jid, { jid: ctx.from.jid, pn: ctx.from.pn, name: ctx.from.name });
           }
           const middlewares = [
             ...bot.middlewares,

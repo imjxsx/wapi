@@ -1,7 +1,6 @@
-
 interface IContact {
   jid: string;
   pn: string;
   name: string;
 }
-export const contacts: IContact[] = [];
+export const contacts = new Map<string, IContact>();

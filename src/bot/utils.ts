@@ -4,7 +4,8 @@ import { toError } from "../utils/index.js";
 import type { IBotSendMessageOptions } from "../types/index.js";
 import { Autolinker } from "autolinker";
 import { load } from "cheerio";
-import { groups, profiles } from "../cache/index.js";
+import { groups } from "../cache/index.js";
+import { Context } from "../context/index.js";
 
 export function parseMentions(bot: Bot, text: string, server: JidServer): string[] {
   try {
@@ -53,7 +54,7 @@ export function parseLinks(bot: Bot, text: string): string[] {
     return [];
   }
 }
-export async function sendMessage(bot: Bot, jid: string, content: AnyMessageContent, options?: IBotSendMessageOptions) {
+export async function sendMessage(bot: Bot, jid: string, content: AnyMessageContent, options?: IBotSendMessageOptions): Promise<Context | null> {
   try {
     if (!bot.ws?.ws.isOpen) {
       throw new Error("The WASocket connection is not open.");
@@ -70,9 +71,11 @@ export async function sendMessage(bot: Bot, jid: string, content: AnyMessageCont
     }
     const after = performance.now();
     bot.ping = after - before;
+    return new Context(bot, message);
   }
   catch (e) {
     bot.emit("error", toError(e));
+    return null;
   }
 }
 export async function profilePictureUrl(bot: Bot, jid: string): Promise<string> {
@@ -80,7 +83,7 @@ export async function profilePictureUrl(bot: Bot, jid: string): Promise<string> 
     if (!bot.ws?.ws.isOpen) {
       throw new Error("The WASocket connection is not open.");
     }
-    return profiles.get(jid) ?? await bot.ws.profilePictureUrl(jid, "image") ?? "https://i.pinimg.com/736x/62/01/0d/62010d848b790a2336d1542fcda51789.jpg";
+    return await bot.ws.profilePictureUrl(jid, "image") ?? "https://i.pinimg.com/736x/62/01/0d/62010d848b790a2336d1542fcda51789.jpg";
   }
   catch (e) {
     bot.emit("error", toError(e));

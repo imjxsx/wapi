@@ -1,28 +1,26 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "outDir": "build",
-    "rootDir": "src",
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "strict": true,
-    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    //"forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "useUnknownInCatchVariables": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noEmitOnError": true,
-    "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
+  "include": [
+    "./src",
+  ],
   "exclude": [
-    "node_modules",
-    "build",
+    "./node_modules",
+    "./dist",
+    "./example"
   ]
 }

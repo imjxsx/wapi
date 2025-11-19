@@ -1,1 +1,0 @@
-export const profiles = new Map<string, string>();

@@ -1,4 +1,4 @@
-import { toString } from "./helpers.js";
+import { toString } from "./index.js";
 import type { JidServer } from "baileys";
 
 export interface IJidDecoded {

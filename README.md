@@ -1,26 +1,26 @@
 <div align="center">
-  <h1>⚡ @imjxsx/wapi (v1.0.0-beta)</h1>
+  <h1>⚡ @imjxsx/wapi (v1.1.0-beta)</h1>
   <p>Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript</p>
 </div>
 
 ---
 
 <div align="center">
-  <h3>📥 Installation (Currently only available on GitHub.)</h3>
+  <h3>📥 Installation</h3>
 </div>
 
 ```bash
 # With NPM
-npm install github:imjxsx/wapi
+npm install @imjxsx/wapi
 
 # With PNPM
-pnpm add github:imjxsx/wapi
+pnpm add @imjxsx/wapi
 
 # With Yarn
-yarn add github:imjxsx/wapi
+yarn add @imjxsx/wapi
 
 # With Bun
-bun add github:imjxsx/wapi
+bun add @imjxsx/wapi
 ```
 
 ---

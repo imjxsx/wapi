@@ -1,12 +1,11 @@
 import type { BaileysEventMap } from "baileys";
 import type { Bot } from "../bot.js";
-import { decode, isLid, isPn, normalize } from "../../utils/jid.js";
 import { Boom } from "@hapi/boom";
-import type { BotLoginMethod } from "../../types/bot.js";
-import { delay } from "../../utils/utils.js";
-import { toError } from "../../utils/helpers.js";
+import type { BotLoginMethod } from "../../types/index.js";
+import { delay, decode, isLid, isPn, normalize, toError } from "../../utils/index.js";
+import { contacts } from "../../cache/index.js";
 
-export function connection(bot: Bot, method: BotLoginMethod): void {
+export function connectionUpdate(bot: Bot, method: BotLoginMethod): void {
   try {
     bot.ws?.ev.on("connection.update", async (update) => {
       try {
@@ -71,6 +70,7 @@ export function connection(bot: Bot, method: BotLoginMethod): void {
             return;
           }
           bot.account = { jid, pn, name };
+          contacts.set(jid, { jid, pn, name });
           bot.status = "open";
           bot.emit("open", bot.account);
           return;

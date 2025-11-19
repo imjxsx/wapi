@@ -1,7 +1,7 @@
 import { proto, type WAMessage } from "baileys";
 import type { IChat, IFrom, MessageType } from "../types/index.js";
 import Long from "long";
-import type { Bot } from "../bot/bot.js";
+import type { Bot } from "../bot/index.js";
 import { isGroup, isLid, isLink, isPn, isString } from "../utils/index.js";
 import { contacts, groups } from "../cache/index.js";
 
@@ -35,8 +35,8 @@ export class Message {
     this.serialize(bot);
     this.parse(bot, this.message.message ?? {});
     if (this.text) {
-      this.mentions = this.mentions.concat(...bot.parseMentions(this.text, this.chat.addressing === "lid" ? "lid" : "s.whatsapp.net")).concat(...this.mentions);
-      this.links = this.links.concat(...bot.parseLinks(this.text)).concat(...this.links);
+      this.mentions.push(...bot.parseMentions(this.text, this.chat.addressing === "lid" ? "lid" : "s.whatsapp.net"));
+      this.links.push(...bot.parseLinks(this.text));
     }
     if (this.quoted) {
       if (this.quoted.chat.type === "unknown") {
@@ -72,7 +72,7 @@ export class Message {
             pn,
             type: "private",
             addressing: "pn",
-            name: contacts.find((v) => ((jid && jid === v.jid) || (pn && pn === v.pn)))?.name ?? "",
+            name: Array.from(contacts.values()).find((v) => ((jid && jid === v.jid) || (pn && pn === v.pn)))?.name ?? "",
           };
         }
       }

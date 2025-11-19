@@ -8,6 +8,7 @@ import { disconnect } from "./disconnect.js";
 import { logout } from "./logout.js";
 import { groupMetadata, parseLinks, parseMentions, profilePictureUrl, sendMessage } from "./utils.js";
 import type { AnyMessageContent, GroupMetadata, JidServer } from "baileys";
+import { Context } from "../context/index.js";
 
 export class Bot extends EventEmitter<IBotEventMap> {
   public uuid: UUID;
@@ -54,7 +55,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
   public parseLinks(text: string): string[] {
     return parseLinks(this, text);
   }
-  public async sendMessage(jid: string, content: AnyMessageContent, options?: IBotSendMessageOptions) {
+  public async sendMessage(jid: string, content: AnyMessageContent, options?: IBotSendMessageOptions): Promise<Context | null> {
     return sendMessage(this, jid, content, options);
   }
   public async groupMetadata(jid: string): Promise<GroupMetadata | null> {

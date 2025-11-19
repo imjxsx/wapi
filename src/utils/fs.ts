@@ -1,4 +1,4 @@
-import { isBuffer, toError } from "./helpers.js";
+import { isBuffer, toError } from "./index.js";
 import fs from "node:fs";
 
 export class FS {

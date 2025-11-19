@@ -1,7 +1,7 @@
-import { toError } from "../../utils/helpers.js";
+import { toError } from "../../utils/index.js";
 import type { Bot } from "../bot.js";
 
-export function creds(bot: Bot): void {
+export function credsUpdate(bot: Bot): void {
   try {
     bot.ws?.ev.on("creds.update", async () => {
       try {
