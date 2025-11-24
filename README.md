@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>⚡ @imjxsx/wapi (v1.1.0-beta)</h1>
+  <h1>⚡ @imjxsx/wapi (v1.2.0)</h1>
   <p>Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript</p>
 </div>
 

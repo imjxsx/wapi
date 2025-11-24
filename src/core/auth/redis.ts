@@ -1,27 +1,28 @@
 import { createHash, type UUID } from "node:crypto";
-import path from "node:path";
-import { initAuthCreds, proto, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
-import type { IBotAuthInit } from "../types/index.js";
-import { AES256GCM, FS, isBuffer, isString, isUint8Array, isUUID } from "../utils/index.js";
+import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
+import type { Redis } from "ioredis";
+import { type IBotAuthInit } from "../../types/index.js";
+import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../../utils/index.js";
 
-export class LocalAuth {
-  private directory: string;
+export class RedisAuth {
+  private prefix: string;
   private aes: AES256GCM;
   private cache = new Map<string, Buffer>();
   private creds?: AuthenticationCreds;
+  private redis: Redis;
   public uuid: UUID;
-  constructor(uuid: UUID, directory: string) {
+  constructor(uuid: UUID, redis: Redis, prefix: string) {
     if (!isUUID(uuid)) {
       throw new Error(`'${uuid}' is not a valid UUID.`);
     }
-    this.directory = path.isAbsolute(directory) ? path.join(directory, uuid) : path.resolve(directory, uuid);
+    this.prefix = `${prefix}:${uuid}:`;
     this.aes = new AES256GCM(uuid);
+    this.redis = redis;
     this.uuid = uuid;
   }
   private async get<T>(key: string): Promise<T | null> {
     const md5 = createHash("md5").update(key).digest("hex");
-    const filepath = path.join(this.directory, `${md5}.enc`);
-    const encrypted = this.cache.get(md5) ?? await FS.readfile(filepath);
+    const encrypted = this.cache.get(md5) ?? await this.redis.getBuffer(`${this.prefix + md5}`);
     if (!isBuffer(encrypted)) {
       return null;
     }
@@ -40,7 +41,6 @@ export class LocalAuth {
   }
   private async set(key: string, value: any): Promise<void> {
     const md5 = createHash("md5").update(key).digest("hex");
-    const filepath = path.join(this.directory, `${md5}.enc`);
     const stringified = JSON.stringify(value, (_, value) => {
       if (!isBuffer(value) && !isUint8Array(value) && value?.type !== "Buffer") {
         return value;
@@ -54,19 +54,15 @@ export class LocalAuth {
     if (!isBuffer(encrypted)) {
       return;
     }
-    await FS.writefile(filepath, encrypted);
+    await this.redis.set(`${this.prefix + md5}`, encrypted);
     this.cache.set(md5, encrypted);
   }
-  private async delete(key: string): Promise<void> {
+  private async del(key: string): Promise<void> {
     const md5 = createHash("md5").update(key).digest("hex");
-    const filepath = path.join(this.directory, `${md5}.enc`);
-    await FS.rm(filepath);
+    await this.redis.del(`${this.prefix + md5}`);
     this.cache.delete(md5);
   }
   public async init(): Promise<IBotAuthInit> {
-    if (!(await FS.exists(this.directory))) {
-      await FS.mkdir(this.directory);
-    }
     this.creds = await this.get<AuthenticationCreds>("creds") ?? initAuthCreds();
     const keys: SignalKeyStore = {
       get: async (type, ids) => {
@@ -87,13 +83,13 @@ export class LocalAuth {
       },
       set: async (data) => {
         const tasks: Promise<void>[] = [];
-        for (const type of Object.keys(data)) {
+        for (const type of (Object.keys(data) as (keyof SignalDataSet)[])) {
           if (!data[type]) {
             continue;
           }
           for (const id of Object.keys(data[type])) {
             const value = data[type][id];
-            const task = value ? this.set(`${type}-${id}`, value) : this.delete(`${type}-${id}`);
+            const task = value ? this.set(`${type}-${id}`, value) : this.del(`${type}-${id}`);
             tasks.push(task);
           }
         }
@@ -112,7 +108,11 @@ export class LocalAuth {
     await this.set("creds", this.creds);
   }
   public async remove(): Promise<void> {
-    await FS.rm(this.directory);
+    const keys = await this.redis.keys(`${this.prefix}*`);
+    if (!keys.length) {
+      return;
+    }
+    await this.redis.del(...keys);
     this.cache.clear();
   }
 }

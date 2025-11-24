@@ -1,9 +1,9 @@
 import { proto, type WAMessage } from "baileys";
-import type { IChat, IFrom, MessageType } from "../types/index.js";
+import type { IChat, IFrom } from "../../types/index.js";
 import Long from "long";
-import type { Bot } from "../bot/index.js";
-import { isGroup, isLid, isLink, isPn, isString } from "../utils/index.js";
-import { contacts, groups } from "../cache/index.js";
+import type { Bot } from "../bot.js";
+import { isGroup, isLid, isLink, isPn, isString } from "../../utils/index.js";
+import { contacts, groups } from "../../cache/index.js";
 
 export class Message {
   public message: WAMessage;
@@ -18,13 +18,13 @@ export class Message {
     pn: "",
     name: "",
   };
-  public type: MessageType = "unknown";
+  public type: keyof proto.IMessage = "conversation";
   public id = "";
   public timestamp = 0;
   public hash = "";
   public mimetype = "";
-  public size = 0;
   public text = "";
+  public size = 0;
   public mentions: string[] = [];
   public links: string[] = [];
   public quoted?: Message;
@@ -105,25 +105,17 @@ export class Message {
     }
   }
   private parse(bot: Bot, message: proto.IMessage): void {
-    const type = Object.keys(message)[0];
+    const type = (Object.keys(message) as (keyof proto.IMessage)[]).find((v) => (v !== "senderKeyDistributionMessage" && v !== "messageContextInfo"));
     if (!type || !message[type]) {
       return;
     }
+    this.type = type;
     switch (type) {
-      case "conversation": {
-        const m = message[type].trim();
-        this.type = "conversation";
-        this.mimetype = "text/plain";
-        this.size = m.length;
-        this.text = m;
-        break;
-      }
+      case "conversation":
       case "extendedTextMessage": {
         const m = message[type];
-        this.type = type;
-        this.mimetype = "text/plain";
-        this.size = (m.text ?? "").trim().length;
-        this.text = (m.text ?? "").trim();
+        this.text = (isString(m) ? m : m.text ?? "").trim();
+        this.size = this.text.length;
         break;
       }
       case "viewOnceMessage":
@@ -134,17 +126,13 @@ export class Message {
         this.parse(bot, m.message ?? {});
         break;
       }
-      case "imageMessage":
-      case "videoMessage":
-      case "audioMessage":
-      case "documentMessage":
-      case "stickerMessage": {
+      default: {
         const m = message[type];
         this.type = type;
-        this.hash = m.fileSha256 ? Buffer.from(m.fileSha256).toString("hex") : "";
-        this.mimetype = m.mimetype ?? "";
-        this.size = m.fileLength ? Long.fromValue(m.fileLength).toNumber() : 0;
-        this.text = "caption" in m ? (m.caption ?? "").trim() : "";
+        this.hash = "fileSha256" in m && m.fileSha256 ? Buffer.from(m.fileSha256).toString("hex") : "";
+        this.mimetype = "mimetype" in m && m.mimetype ? m.mimetype : "";
+        this.text = "text" in m && m.text ? m.text : "caption" in m && m.caption ? m.caption : "";
+        this.size = "fileLength" in m && m.fileLength ? Long.fromValue(m.fileLength).toNumber() : this.text.length;
         break;
       }
     }

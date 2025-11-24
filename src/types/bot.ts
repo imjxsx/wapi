@@ -1,5 +1,5 @@
-import type { GroupMetadata, MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "baileys";
-import type { Context } from "../context/context.js";
+import type { MiscMessageGenerationOptions, AuthenticationCreds, SignalKeyStore, makeWASocket } from "baileys";
+import type { Context } from "../core/context/context.js";
 
 export interface IBotEventMap {
   error: [error: Error];

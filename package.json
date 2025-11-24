@@ -1,6 +1,6 @@
 {
   "name": "@imjxsx/wapi",
-  "version": "1.1.0-beta",
+  "version": "1.2.0",
   "description": "Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript.",
   "license": "MIT",
   "type": "module",
@@ -17,18 +17,17 @@
     "./README.md"
   ],
   "scripts": {
-    "dev": "tsx ./example/index",
-    "build": "tsc",
+    "dev": "node ./example/index",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "esbuild './src/**/*.ts' --outbase=src --outdir=dist --format=esm --platform=node --target=es2022 --sourcemap --minify --packages=external",
     "prepare": "pnpm run build"
   },
   "keywords": [
     "bot",
     "whatsapp",
     "baileys",
-    "lightweight",
-    "typescript",
     "framework",
-    "nodejs",
     "wapi"
   ],
   "author": "imjxsx",
@@ -46,17 +45,18 @@
     "@imjxsx/logger": "1.1.1",
     "autolinker": "4.1.5",
     "baileys": "7.0.0-rc.9",
-    "cheerio": "1.1.2"
+    "cheerio": "1.1.2",
+    "long": "5.3.2"
   },
   "devDependencies": {
     "@types/node": "20.19.5",
     "@types/qrcode": "1.5.6",
+    "esbuild": "0.27.0",
+    "ioredis": "5.8.2",
+    "mongodb": "7.0.0",
     "qrcode": "1.5.4",
     "tsx": "4.20.6",
-    "typescript": "5.9.3",
-    "ioredis": "5.8.2",
-    "long": "5.3.2",
-    "mongodb": "7.0.0"
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20.0.0"

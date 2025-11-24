@@ -1,8 +1,8 @@
 import { createHash, type UUID } from "node:crypto";
-import { initAuthCreds, proto, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
+import { initAuthCreds, proto, SignalDataSet, type AuthenticationCreds, type SignalDataTypeMap, type SignalKeyStore } from "baileys";
 import type { Collection, Document } from "mongodb";
-import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../utils/index.js";
-import type { IBotAuthInit } from "../types/index.js";
+import { AES256GCM, isBuffer, isString, isUint8Array, isUUID } from "../../utils/index.js";
+import type { IBotAuthInit } from "../../types/index.js";
 
 interface IAuthState extends Document {
   uuid: UUID;
@@ -96,7 +96,7 @@ export class MongoAuth {
       },
       set: async (data) => {
         const tasks: Promise<void>[] = [];
-        for (const type of Object.keys(data)) {
+        for (const type of (Object.keys(data) as (keyof SignalDataSet)[])) {
           if (!data[type]) {
             continue;
           }

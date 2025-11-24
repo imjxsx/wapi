@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import { Bot, LocalAuth } from "../src/index.js";
+import { Bot, LocalAuth } from "../dist/index.js";
 import Logger from "@imjxsx/logger";
 
 const logger = new Logger({
@@ -16,6 +16,9 @@ const bot = new Bot(uuid, auth, account, logger);
 bot.on("qr", async (qr) => {
   qr = await QRCode.toString(qr, { type: "terminal", small: true });
   console.log(qr);
+});
+bot.on("otp", (otp) => {
+  bot.logger.info(otp);
 });
 bot.on("open", (account) => {
   bot.logger.info(`Successful login to @${account.name} (${account.pn})`);

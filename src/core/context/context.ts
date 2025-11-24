@@ -1,8 +1,8 @@
 import { downloadMediaMessage, type WAMediaUpload, type WAMessage } from "baileys";
-import type { IReplyOptions, IReplyWithImageOptions, IReplyWithVideoOptions } from "../types/context.js";
-import { isBuffer, isLink, toString } from "../utils/index.js";
+import type { IReplyOptions, IReplyWithAudioOptions, IReplyWithImageOptions, IReplyWithVideoOptions } from "../../types/context.js";
+import { isBuffer, isLink, toString } from "../../utils/index.js";
 import { Message } from "./message.js";
-import type { Bot } from "../bot/bot.js";
+import type { Bot } from "../bot.js";
 
 export class Context extends Message {
   public bot: Bot;
@@ -55,6 +55,7 @@ export class Context extends Message {
     }
     const context = await this.bot.sendMessage(this.chat.jid, {
       image: media,
+      mimetype: "image/jpeg",
       ...options,
     }, {
       quoted: this.message,
@@ -83,6 +84,36 @@ export class Context extends Message {
     }
     const context = await this.bot.sendMessage(this.chat.jid, {
       video: media,
+      mimetype: "video/mp4",
+      ...options,
+    }, {
+      quoted: this.message,
+      addressing: this.chat.addressing === "lid" ? "lid" : "pn",
+    });
+    if (!context) {
+      throw new Error("The message could not be sent.");
+    }
+    return context;
+  }
+  public async replyWithAudio(video: string | Buffer, options?: IReplyWithAudioOptions): Promise<Context> {
+    if (!this.chat.jid) {
+      throw new Error("Unknown chat.");
+    }
+    let media: WAMediaUpload;
+    if (isBuffer(video)) {
+      media = video;
+    }
+    else if (isLink(video)) {
+      media = {
+        url: video,
+      };
+    }
+    else {
+      throw new Error("Video type not supported.");
+    }
+    const context = await this.bot.sendMessage(this.chat.jid, {
+      audio: media,
+      mimetype: "audio/mpeg",
       ...options,
     }, {
       quoted: this.message,
@@ -102,6 +133,7 @@ export class Context extends Message {
     }
     const context = await this.bot.sendMessage(this.chat.jid, {
       sticker,
+      mimetype: "image/webp",
       ...options,
     }, {
       quoted: this.message,
