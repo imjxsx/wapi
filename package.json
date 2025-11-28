@@ -1,6 +1,6 @@
 {
   "name": "@imjxsx/wapi",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Framework for developing bots for the WhatsApp application: fast, secure, and elegant, powered by Baileys and developed 100% in TypeScript.",
   "license": "MIT",
   "type": "module",

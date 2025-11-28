@@ -123,7 +123,7 @@ export class Bot extends EventEmitter<IBotEventMap> {
                 break;
               }
               default: {
-                if (output.payload.message === "Intentional disconnection.") {
+                if (update.lastDisconnect?.error?.message === "Intentional disconnection.") {
                   this.ws = null;
                   this.removeAllListeners();
                   this.status = "close";
