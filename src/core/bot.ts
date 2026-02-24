@@ -51,12 +51,11 @@ export class Bot extends EventEmitter<IBotEventMap> {
         auth,
         browser: [os.platform(), "Firefox", os.release()],
         logger: this.logger.child({ name: `WASocket ${this.uuid} ` }),
-        qrTimeout: 60_000,
+        qrTimeout: 30_000,
         markOnlineOnConnect: true,
         syncFullHistory: false,
         shouldSyncHistoryMessage: () => (false),
         generateHighQualityLinkPreview: true,
-        linkPreviewImageThumbnailWidth: 1_980,
         shouldIgnoreJid: (jid) => {
           if (!isGroup(jid) && !isPn(jid) && !isLid(jid)) {
             return true;
@@ -66,7 +65,9 @@ export class Bot extends EventEmitter<IBotEventMap> {
         cachedGroupMetadata: async (jid) => {
           return groups.get(jid);
         },
-        version: [2, 3_000, 1_027_934_701],
+        //TODO: Temporary solution
+        //https://github.com/WhiskeySockets/Baileys/issues/2370
+        version: [2, 3e3, 1_033_962_578],
       });
       this.ws.ev.on("creds.update", async () => {
         try {
@@ -96,7 +97,8 @@ export class Bot extends EventEmitter<IBotEventMap> {
             }
           }
           if (update.connection === "close") {
-            this.ws?.ev.removeAllListeners(undefined as unknown as keyof BaileysEventMap);
+            //@ts-ignore
+            this.ws?.ev.removeAllListeners(undefined);
             const output = new Boom(update.lastDisconnect?.error).output;
             this.emit("close", `${output.payload.error} ${output.payload.statusCode}: ${output.payload.message}`);
             switch (output.payload.statusCode) {
